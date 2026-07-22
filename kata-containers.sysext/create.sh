@@ -5,7 +5,7 @@
 #
 # Ships the upstream "kata-static" release tarball, which bundles
 # the kata runtime, agent, shim, guest kernel, initrd and a hypervisor
-# (QEMU and/or Cloud Hypervisor) under /opt/kata.
+# (QEMU and/or Cloud Hypervisor) under /usr/local/kata.
 #
 
 RELOAD_SERVICES_ON_MERGE="true"
@@ -55,8 +55,8 @@ function populate_sysext_root() {
   # The tarball expands to ./opt/kata/{bin,libexec,share,...}.
   tar --force-local -xf "${tarball}"
 
-  mkdir -p "${sysextroot}/opt"
-  cp -aR opt/kata "${sysextroot}/opt/"
+  mkdir -p "${sysextroot}/usr/local"
+  cp -aR opt/kata "${sysextroot}/usr/local/"
 
   # Expose the user-facing binaries via /usr/bin so they're on $PATH
   # after the sysext is merged. Use relative symlinks so they continue
@@ -64,14 +64,14 @@ function populate_sysext_root() {
   mkdir -p "${sysextroot}/usr/bin"
   local bin
   for bin in kata-runtime containerd-shim-kata-v2 ; do
-    if [[ ! -e "${sysextroot}/opt/kata/bin/${bin}" ]] ; then
+    if [[ ! -e "${sysextroot}/usr/local/kata/bin/${bin}" ]] ; then
       echo "ERROR: expected binary ${bin} missing from kata-static ${rel_version}." >&2
       return 1
     fi
-    ln -sf "../../opt/kata/bin/${bin}" "${sysextroot}/usr/bin/${bin}"
+    ln -sf "../local/kata/bin/${bin}" "${sysextroot}/usr/bin/${bin}"
   done
   if [[ -e "${sysextroot}/opt/kata/bin/kata-collect-data.sh" ]] ; then
-    ln -sf "../../opt/kata/bin/kata-collect-data.sh" \
+    ln -sf "../local/kata/bin/kata-collect-data.sh" \
       "${sysextroot}/usr/bin/kata-collect-data.sh"
   fi
 }
